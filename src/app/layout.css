@@ -1,0 +1,11 @@
+@tailwind utilities;
+@layer utilities {
+  .bg-linear-main {
+    background: linear-gradient(144.58644919340165deg, #7280F4 0%, #F15F86 100%);
+  }
+  .bg-linear-text {
+    background: linear-gradient(144.58644919340165deg, #7280F4 0%, #F15F86 100%);
+    @apply  bg-clip-text;
+    -webkit-text-fill-color: transparent;
+  }  
+}

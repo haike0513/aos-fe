@@ -1,0 +1,5 @@
+.head-title {
+  background: linear-gradient(144.58644919340165deg, #7280F4 0%, #F15F86 100%);
+  @apply  bg-clip-text;
+  -webkit-text-fill-color: transparent;
+}
