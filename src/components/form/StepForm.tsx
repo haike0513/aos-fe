@@ -1,5 +1,5 @@
 'use client';
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormDescription, FormMessage } from '../ui/form';
 import {
@@ -13,8 +13,10 @@ import { Input } from '../ui/input';
 import { Button } from '../ui/button';
 import clsx from 'clsx';
 import { AlarmClockIcon, AwardIcon, LoaderIcon } from 'lucide-react';
-import { ReactNode } from 'react';
+import { ReactNode, useCallback, useState } from 'react';
 import {Slider as CompareSlider } from './slider';
+import axios from 'axios';
+import useSWR from 'swr';
 
 export interface ModelCompareItemProps {
   icon?: ReactNode;
@@ -51,8 +53,42 @@ export const ModelCompareItem = ({
 
 }
 
+const fetcher = async(url: string) => {
+  const rs = await axios.get(url)
+  return rs.data;
+}
+
 export default function StepForm() {
   const form = useForm();
+  const values = useWatch({
+    control: form.control,
+  });
+  console.log(values);
+  const [loading, setLoading] = useState(false);
+
+  const [data, setData] = useState();
+
+  const [showParam, setShowParam] = useState<string>();
+
+  const modelsListData = useSWR('/api/list_models', fetcher)
+
+  const submit = useCallback(async () => {
+    setLoading(true)
+    try {
+      // const rs = await axios.post('/api/list_models') ;
+
+      await new Promise((resolve) => {
+        setTimeout(() => {
+          resolve(true)
+        }, 2000);
+      })
+      
+    } catch (error) {
+      
+    }
+    setLoading(false);
+    console.log(form.getValues());
+  }, [form])
   return (
     <div className=" flex flex-col gap-6">
       <div className=' font-bold'>
@@ -64,47 +100,50 @@ export default function StepForm() {
           <FormField
             control={form.control}
             name="model"
-            render={() => (
+            defaultValue={'llama-7b'}
+            render={({field}) => (
               <FormItem>
                 <FormLabel />
-                <FormControl>
-                  <Select>
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <FormControl>
                     <SelectTrigger className="">
                       <SelectValue placeholder="" />
                     </SelectTrigger>
-                    <SelectContent className=' text-muted'>
-                      <SelectItem value="light">Light</SelectItem>
-                      <SelectItem value="dark">Dark</SelectItem>
-                      <SelectItem value="system">System</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </FormControl>
+                  </FormControl>
+                  <SelectContent className=' text-muted'>
+                    <SelectItem value="llama-7b">llama-7b</SelectItem>
+                    <SelectItem value="llama-32b">llama-32b</SelectItem>
+                    <SelectItem value="llama-64b">llama-64b</SelectItem>
+                  </SelectContent>
+                </Select>
+       
                 <FormDescription />
                 <FormMessage />
               </FormItem>
             )}
           />
           <div className=' mt-10'>
-            <Accordion type="single" collapsible defaultValue='item-1' className=' bg-black rounded-md'>
-              <AccordionItem value="item-1" className=' px-4'>
+            <Accordion type="single" collapsible value={showParam} onValueChange={(e) => setShowParam(e)} className=' bg-black rounded-md'>
+              <AccordionItem value="params" className=' px-4'>
                 <AccordionTrigger className=' text-white text-xl'>parameters</AccordionTrigger>
                 <AccordionContent className='flex flex-col gap-2'>
                      <FormField
                     control={form.control}
                     name="Temperature"
-                    render={() => (
+                    defaultValue={[0.7]}
+                    render={({field}) => (
                       <FormItem>
                         <FormLabel className='flex justify-between items-center'>
                           <span className='text-[#BEC0C1] text-sm font-normal'>
                           Temperature
                           </span>
                           <FormControl>
-                            <Input className=' w-20 text-[#BEC0C1] h-6 text-xs text-right' type="number" max={100} step={1} />
+                            <Input className=' w-20 text-[#BEC0C1] h-6 text-xs text-center' type="number" min={0} max={1} step={0.1} onChange={(v) => field.onChange([v.target.value])} value={field.value?.[0]}/>
                           </FormControl>
                         </FormLabel>
                         
                         <FormControl>
-                            <Slider max={1} step={0.1} />
+                            <Slider max={1} step={0.1} onValueChange={field.onChange} value={field.value} />
                         </FormControl>
                         <FormDescription />
                         <FormMessage />
@@ -114,18 +153,19 @@ export default function StepForm() {
                                        <FormField
                     control={form.control}
                     name="top"
-                    render={() => (
+                    defaultValue={[1]}
+                    render={({field}) => (
                       <FormItem>
                         <FormLabel className='flex justify-between items-center'>
                           <span className='text-[#BEC0C1] text-sm font-normal'>
                             Top P
                           </span>
                           <FormControl>
-                            <Input className=' w-20 text-[#BEC0C1] h-6 text-xs text-right' type="number" max={100} step={1} />
+                            <Input className=' w-20 text-[#BEC0C1] h-6 text-xs text-center' type="number" min={0} max={1} step={0.1} onChange={(v) => field.onChange([v.target.value])} value={field.value?.[0]}/>
                           </FormControl>
                         </FormLabel>
                         <FormControl>
-                            <Slider defaultValue={[0.2]} max={1} step={0.1} />
+                          <Slider max={1} step={0.1} onValueChange={field.onChange} value={field.value} />
                         </FormControl>
                         <FormDescription />
                         <FormMessage />
@@ -135,6 +175,7 @@ export default function StepForm() {
                   <FormField
                     control={form.control}
                     name="max"
+                    defaultValue={[1024]}
                     render={({field}) => (
                       <FormItem>
                         <FormLabel className='flex justify-between items-center'>
@@ -142,12 +183,12 @@ export default function StepForm() {
                             Max output tokens
                           </span>
                           <FormControl>
-                            <Input className=' w-20 text-[#BEC0C1] h-6 text-xs text-right' type="number" max={100} step={1} />
+                            <Input className=' w-20 text-[#BEC0C1] h-6 text-xs text-center' type="number" min={16} max={2000} step={64} onChange={(v) => field.onChange([v.target.value])} value={field.value?.[0]}/>
                           </FormControl>
                         </FormLabel>
-                        {/* <FormControl> */}
-                            <Slider max={100} step={1} onChange={field.onChange} value={field.value}/>
-                        {/* </FormControl> */}
+                        <FormControl>
+                          <Slider min={16} max={2000} step={64} onValueChange={field.onChange} value={field.value} />
+                        </FormControl>
                         <FormDescription />
                         <FormMessage />
                       </FormItem>
@@ -169,19 +210,21 @@ export default function StepForm() {
                 <FormField
                   control={form.control}
                     name="promote"
-                    render={() => (
+                    render={({field}) => (
                       <FormItem className='flex-grow'>
                         <FormLabel>
                         </FormLabel>
                         <FormControl>
-                          <Input placeholder='What is ai?' className=' bg-transparent border-none w-full' />
+                          <Input placeholder='What is ai?' className=' bg-transparent border-none w-full' {...field}/>
                         </FormControl>
                         <FormDescription />
                         <FormMessage />
                       </FormItem>
                     )}
                   />
-                  <Button disabled={false} className='bg-linear-main  text-white disabled:opacity-50'>
+                  <Button disabled={loading} className='bg-linear-main  text-white disabled:opacity-50'
+                    onClick={form.handleSubmit(submit)}
+                  >
                     Interface
                   </Button>
             </div>
@@ -203,7 +246,7 @@ export default function StepForm() {
               <span className=' text-white font-bold text-2xl ml-2'>0.9</span>
             </div>
           </div>
-            <CompareSlider className=' bg-linear-main rounded-full h-5' defaultValue={[0.2]} max={1} step={0.1} />
+            <CompareSlider className=' bg-linear-main rounded-full h-5' min={-1} defaultValue={[0]} max={1} step={0.1} value={loading ? [0] : [0.9]} />
             <div className=' grid grid-cols-3 h-20 text-sm'>
               <div className=' self-center flex flex-col items-center justify-center'>
                 <div>
@@ -242,11 +285,27 @@ export default function StepForm() {
           <span className=' text-white text-xl'>compare quality</span>
         </div>
         <div className='grid grid-cols-1 sm:grid-cols-2 gap-6 mt-6'>
-          <div className=' h-80 bg-black rounded-xl'>
+          <div className=' h-80 bg-black rounded-xl p-4'>
+            {loading ? <div className=' w-full h-full flex items-center justify-center'><LoaderIcon className=' animate-spin' /></div> : <div>
+              <div className=' text-white font-bold text-xl'>
+                {`llama-7b on CPU`}
+              </div>
+              <div className=' text-sm text-[#BEC0C1] font-light mt-2 overflow-y-scroll'>
+                {'AI stands for "Artificial Intelligence." It refers to the development of computer systems that can perform tasks that typically require human intelligence, such as visual perception, speech recognition, decision-making, and language translation. AI can be achieved through a combination of techniques such as machine learning, natural language processing, computer vision, and robotics. The ultimate goal of AI research is to create machines that can think and learn like humans, and can even exceed human capabilities in certain areas.'}
+              </div>
 
+            </div> }
           </div>
-          <div className=' h-80 bg-black rounded-xl'>
+          <div className=' h-80 bg-black rounded-xl p-4'>
+            {loading ? <div className=' w-full h-full flex items-center justify-center'><LoaderIcon className=' animate-spin' /></div> : <div>
+              <div className=' text-white font-bold text-xl'>
+                {`llama-7b on GPU`}
+              </div>
+              <div className=' text-sm text-[#BEC0C1] font-light mt-2 overflow-y-scroll'>
+                {'AI stands for "Artificial Intelligence." It refers to the development of computer systems that can perform tasks that typically require human intelligence, such as visual perception, speech recognition, decision-making, and language translation. AI can be achieved through a combination of techniques such as machine learning, natural language processing, computer vision, and robotics. The ultimate goal of AI research is to create machines that can think and learn like humans, and can even exceed human capabilities in certain areas.'}
+              </div>
 
+            </div> }
           </div>
 
         </div>
@@ -255,12 +314,13 @@ export default function StepForm() {
         <div className=' text-white font-bold text-xl mb-2'>
           Times
         </div>
-        <div className=' grid grid-cols-2 gap-6'>
+        <div className=' grid grid-cols-1 sm:grid-cols-2 gap-6'>
           <ModelCompareItem
-            isLoading
+            isLoading={loading}
             icon={<AlarmClockIcon className='h-4 w-4' />}
            />
           <ModelCompareItem 
+          isLoading={loading}
           icon={<AlarmClockIcon className='h-4 w-4' />}
           content={'82 S'}
           />
@@ -273,13 +333,15 @@ export default function StepForm() {
         <div className=' text-[#BEC0C1] mt-2 mb-4'>
           {'Predict score: The value range is between -11 and 11. The closer the value is to 11, the better the result. A higher value means the inference quality is better.'}
         </div>
-        <div className=' grid grid-cols-2 gap-6'>
+        <div className=' grid grid-cols-1 sm:grid-cols-2 gap-6'>
           <ModelCompareItem 
+            isLoading={loading}
             isActive
             icon={<AwardIcon className='h-4 w-4' />}
             content={'82 S'}
           />
           <ModelCompareItem 
+            isLoading={loading}
             icon={<AwardIcon className='h-4 w-4' />}
             content={'82 S'}
           />
