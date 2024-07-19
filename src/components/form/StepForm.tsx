@@ -11,6 +11,45 @@ import {
 import { Slider } from "@/components/ui/slider";
 import { Input } from '../ui/input';
 import { Button } from '../ui/button';
+import clsx from 'clsx';
+import { AlarmClockIcon, AwardIcon, LoaderIcon } from 'lucide-react';
+import { ReactNode } from 'react';
+import {Slider as CompareSlider } from './slider';
+
+export interface ModelCompareItemProps {
+  icon?: ReactNode;
+  name?: string;
+  isActive?: boolean;
+  isLoading?: boolean;
+  content?: ReactNode
+}
+
+export const ModelCompareItem = ({
+  icon,
+  name,
+  isActive,
+  isLoading,
+  content,
+}: ModelCompareItemProps) => {
+  return <div>
+  <div className='mb-1'>
+    Model Name
+  </div>
+  <div className={clsx('rounded-md p-0.5', {
+    'bg-linear-main': isActive,
+    'bg-[#15171B]': !isActive,
+  })}>
+    <div className={clsx('bg-[#15171B] h-10 rounded flex items-center justify-center', {
+      'bg-[#383838]': isActive
+    })}>
+      {isLoading ? <LoaderIcon className=' animate-spin' /> : <div className='flex items-center justify-center gap-2 text-[#BEC0C1]'>
+        {icon} {content}
+        </div>}
+    </div>
+  </div>
+</div>
+
+}
 
 export default function StepForm() {
   const form = useForm();
@@ -55,9 +94,15 @@ export default function StepForm() {
                     name="Temperature"
                     render={() => (
                       <FormItem>
-                        <FormLabel>
-                        Temperature
+                        <FormLabel className='flex justify-between items-center'>
+                          <span className='text-[#BEC0C1] text-sm font-normal'>
+                          Temperature
+                          </span>
+                          <FormControl>
+                            <Input className=' w-20 text-[#BEC0C1] h-6 text-xs text-right' type="number" max={100} step={1} />
+                          </FormControl>
                         </FormLabel>
+                        
                         <FormControl>
                             <Slider max={1} step={0.1} />
                         </FormControl>
@@ -71,8 +116,13 @@ export default function StepForm() {
                     name="top"
                     render={() => (
                       <FormItem>
-                        <FormLabel>
-                        Top P
+                        <FormLabel className='flex justify-between items-center'>
+                          <span className='text-[#BEC0C1] text-sm font-normal'>
+                            Top P
+                          </span>
+                          <FormControl>
+                            <Input className=' w-20 text-[#BEC0C1] h-6 text-xs text-right' type="number" max={100} step={1} />
+                          </FormControl>
                         </FormLabel>
                         <FormControl>
                             <Slider defaultValue={[0.2]} max={1} step={0.1} />
@@ -92,7 +142,7 @@ export default function StepForm() {
                             Max output tokens
                           </span>
                           <FormControl>
-                            <Input className=' w-20 text-[#BEC0C1] h-8' type="number" max={100} step={1} />
+                            <Input className=' w-20 text-[#BEC0C1] h-6 text-xs text-right' type="number" max={100} step={1} />
                           </FormControl>
                         </FormLabel>
                         {/* <FormControl> */}
@@ -131,7 +181,7 @@ export default function StepForm() {
                       </FormItem>
                     )}
                   />
-                  <Button className='bg-linear-main  text-white'>
+                  <Button disabled={false} className='bg-linear-main  text-white disabled:opacity-50'>
                     Interface
                   </Button>
             </div>
@@ -153,7 +203,34 @@ export default function StepForm() {
               <span className=' text-white font-bold text-2xl ml-2'>0.9</span>
             </div>
           </div>
-          <Slider className='' defaultValue={[0.2]} max={1} step={0.1} />
+            <CompareSlider className=' bg-linear-main rounded-full h-5' defaultValue={[0.2]} max={1} step={0.1} />
+            <div className=' grid grid-cols-3 h-20 text-sm'>
+              <div className=' self-center flex flex-col items-center justify-center'>
+                <div>
+                  Negative
+                </div>
+                <div>
+                  strong correlation
+                </div>
+              </div>
+              <div className=' self-center flex flex-col items-center justify-center'>
+                <div>
+                  Weak
+                </div>
+                <div>
+                  correlation
+                </div>
+              </div>
+              <div className=' self-center flex flex-col items-center justify-center'>
+                <div>
+                Positive
+                </div>
+                <div>
+                  strong correlation
+                </div>
+              </div>
+
+            </div>
           <div>
 
           </div>
@@ -179,24 +256,14 @@ export default function StepForm() {
           Times
         </div>
         <div className=' grid grid-cols-2 gap-6'>
-          <div>
-            <div>
-              Model Name
-            </div>
-            <div className='bg-[#15171B] h-10 rounded mt-2'>
-
-            </div>
-          </div>
-
-          <div>
-            <div>
-              Model Name
-            </div>
-            <div className='bg-[#15171B] h-10 rounded mt-2'>
-
-            </div>
-          </div>
-
+          <ModelCompareItem
+            isLoading
+            icon={<AlarmClockIcon className='h-4 w-4' />}
+           />
+          <ModelCompareItem 
+          icon={<AlarmClockIcon className='h-4 w-4' />}
+          content={'82 S'}
+          />
         </div>
       </div>
       <div>
@@ -207,24 +274,15 @@ export default function StepForm() {
           {'Predict score: The value range is between -11 and 11. The closer the value is to 11, the better the result. A higher value means the inference quality is better.'}
         </div>
         <div className=' grid grid-cols-2 gap-6'>
-          <div>
-            <div>
-              Model Name
-            </div>
-            <div className='bg-[#15171B] h-10 rounded mt-2'>
-
-            </div>
-          </div>
-
-          <div>
-            <div>
-              Model Name
-            </div>
-            <div className='bg-[#15171B] h-10 rounded mt-2'>
-
-            </div>
-          </div>
-
+          <ModelCompareItem 
+            isActive
+            icon={<AwardIcon className='h-4 w-4' />}
+            content={'82 S'}
+          />
+          <ModelCompareItem 
+            icon={<AwardIcon className='h-4 w-4' />}
+            content={'82 S'}
+          />
         </div>
       </div>
     </div>

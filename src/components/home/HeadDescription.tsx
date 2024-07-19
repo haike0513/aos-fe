@@ -7,7 +7,7 @@ export function DescriptionItem({
   description,
 }: DescriptionItemProps) {
   return (
-    <div className="text-xl  text-[#BEC0C1]">
+    <div className="text-xl  text-[#BEC0C1] font-light">
       <span className="text-white font-semibold">{title}</span>
       {description}
     </div>
