@@ -30,10 +30,10 @@ export default function HeadDescription() {
       title="Predict score："
         description="Predict score：The value range is between -11 and 11. The closer the value is to 11, the better the result. A higher value means the inference quality is better."
       />
-      <DescriptionItem
+      {/* <DescriptionItem
       title="GPT4 score："
         description="GPT4 score：The value range is between 0 and 10. The closer the value is to 10, the better the result. A higher value means the inference quality is better."
-      />
+      /> */}
     </div>
   );
 }
