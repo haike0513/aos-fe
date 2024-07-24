@@ -16,7 +16,10 @@ import { AlarmClockIcon, AwardIcon, LoaderIcon } from 'lucide-react';
 import { ReactNode, useCallback, useState } from 'react';
 import {Slider as CompareSlider } from './slider';
 import axios from 'axios';
-import useSWR from 'swr';
+import useSWR from 'swr/immutable';
+import { BASE_API_ENDPOINT, BASE_GPU_ENDPOINT, BASE_QUALITY_ENDPOINT } from '@/config/base';
+import {nanoid} from 'nanoid'
+import { fetchDispatcher, fetchGpu, fetchModelList } from '@/config/api';
 
 export interface ModelCompareItemProps {
   icon?: ReactNode;
@@ -34,8 +37,8 @@ export const ModelCompareItem = ({
   content,
 }: ModelCompareItemProps) => {
   return <div>
-  <div className='mb-1'>
-    Model Name
+  <div className='mb-1 h-6 truncate'>
+    {name || ''}
   </div>
   <div className={clsx('rounded-md p-0.5', {
     'bg-linear-main': isActive,
@@ -53,8 +56,12 @@ export const ModelCompareItem = ({
 
 }
 
+const controller = new AbortController();
+
+
 const fetcher = async(url: string) => {
-  const rs = await axios.get(url)
+  // const rs = await axios.post(`${BASE_API_ENDPOINT}${url}`)
+  const rs = await fetchModelList()
   return rs.data;
 }
 
@@ -69,26 +76,194 @@ export default function StepForm() {
   const [data, setData] = useState();
 
   const [showParam, setShowParam] = useState<string>();
+  const [modelName, setModelName] = useState('');
 
-  const modelsListData = useSWR('/api/list_models', fetcher)
+  const modelsListData = useSWR('/api/list_models', fetcher);
+  const [dispatchLoading, setDispatchLoading] = useState(false);
+  
+  const [dispatchResult, setDispatchResult] = useState<any>();
+  const handleQueryDispatcher = useCallback(async(values: any) => {
+    let result = {};
+    setDispatchLoading(true);
+    try {
+
+      const data: any = {
+        callback_url: '/',
+        message: values.promote,
+        message_id: nanoid(),
+        model: values.model,
+        conversation_id: '11',
+        // temperature: values?.params?.temperature || 0.7,
+        // top_p: values?.params?.top_p || 1,
+        // max_new_tokens: values?.params?.max_tokens || 1,
+        params: values?.params,
+      }
+      // const data: any = {
+      //   callback_url: '/',
+      //   message: values.promote,
+      //   message_id: nanoid(),
+      //   model: values.model,
+      //   conversation_id: '11',
+      //   params: values?.params,
+      // }
+      // const rs = await axios.post(`${BASE_API_ENDPOINT}/api/question`, data) ;
+      const rs = await fetchDispatcher() ;
+
+      console.log('question', rs);
+      result = rs.data?.result || {};
+      setDispatchResult(result);
+    } catch (error) {
+      
+    }
+    setDispatchLoading(false);
+    return result;
+  }, []);
+
+  const [gpuLoading, setGpuLoading] = useState(false);
+
+  const [gpuResult, setGpuResult] = useState<any>();
+
+  // useCountDown
+
+  const handleQueryGpu = useCallback(async(values: any) => {
+    let result = {};
+    setGpuLoading(true);
+    try {
+      const data: any = {
+        repetition_penalty: 1,
+        prompt: values.promote,
+        message_id: nanoid(),
+        model: values.model,
+        stop_token_ids: null,
+        stop: null,
+        temperature: values?.params?.temperature || 0.7,
+        top_p: values?.params?.top_p || 1,
+        max_new_tokens: values?.params?.max_tokens || 1,
+        // params: values?.params,
+        echo: false,
+      }
+      // const rs = await axios.post(`${BASE_GPU_ENDPOINT}/worker_generate_stream`, data, {
+      //   responseType: 'stream',
+      //   headers: {
+      //     'Accept': 'text/event-stream',
+      //   },
+      // }) ;
+
+
+      // const evtSource = new EventSource(`${BASE_GPU_ENDPOINT}/worker_generate_stream`);
+      // console.log('evtSource', evtSource)
+      // evtSource.onmessage = (e) => {
+      //   console.log('stream',e);
+      // };
+
+
+      // console.log('stream',rs);
+
+
+      
+      
+      // const stream = rs.data
+      // stream.on('data', (data: any) => { 
+      //   console.log('stream data',data);
+      //   data = data.toString()
+      //   console.log(data) 
+      // })
+      const rs = await fetchGpu();
+      result = rs.data?.result || {};
+      setGpuResult(result);
+    } catch (error) {
+      
+    }
+    setGpuLoading(false);
+    return result;
+  }, []);
+
+
+  const [qualityLoading, setQualityLoading] = useState(false);
+
+  const [qualityData, setQualityData] = useState();
+  const handleQueryQuality = useCallback(async(values: any) => {
+    setQualityLoading(true);
+    try {
+      const [dr, gr] = values;
+      console.log('handleQueryQuality', values);
+      const data = [
+        dr?.text,
+        gr?.text,
+      ];
+      const rs = await axios.post(`${BASE_QUALITY_ENDPOINT}/similarity`,data, {signal: controller.signal})
+      console.log('handleQueryQuality', rs);
+      setQualityData(rs.data);
+
+    } catch (error) {
+      
+    }
+    setQualityLoading(false);
+  }, []);
 
   const submit = useCallback(async () => {
     setLoading(true)
     try {
-      // const rs = await axios.post('/api/list_models') ;
+      const values = form.getValues();
+
+      console.log('values', values);
+
+      const params = {
+        top_p: values.top_p?.[0] || 1,
+        temperature: values.temperature?.[0] || 0.7,
+        max_tokens: values.max_tokens?.[0] || 1024,
+      };
+
+      const postParams: any = {
+        promote: values.promote,
+        model: values.model,
+        params,
+      }
+
+      setModelName(values.model);
+
+      // if(!showParam) {
+      //   postParams.params = params;
+      // };
 
       await new Promise((resolve) => {
         setTimeout(() => {
           resolve(true)
-        }, 2000);
-      })
+        }, 1000);
+      });
+
+      const rs = await Promise.all([
+        handleQueryDispatcher(postParams), 
+        handleQueryGpu(postParams)
+      ]);
+
+      await handleQueryQuality(rs);
+
+
+      // const data: any = {
+      //   callback_url: '/',
+      //   message: values.promote,
+      //   message_id: nanoid(),
+      //   model: values.model,
+      //   conversation_id: '11',
+      //   params: params,
+      // }
+      // if(showParam) {
+      //   data.params = params;
+      // };
+
+      // const rs = await axios.post(`${BASE_API_ENDPOINT}/api/question`, data) ;
+
+
       
     } catch (error) {
       
     }
     setLoading(false);
     console.log(form.getValues());
-  }, [form])
+  }, [form, handleQueryDispatcher, handleQueryGpu, handleQueryQuality])
+
+  console.log('setGpuResult', gpuResult)
   return (
     <div className=" flex flex-col gap-6">
       <div className=' font-bold'>
@@ -100,7 +275,13 @@ export default function StepForm() {
           <FormField
             control={form.control}
             name="model"
-            defaultValue={'llama-7b'}
+            // defaultValue={'llama-7b'}
+            rules={{
+              required: {
+                value: true,
+                message: "Model is Require",
+              }
+            }}
             render={({field}) => (
               <FormItem>
                 <FormLabel />
@@ -111,9 +292,9 @@ export default function StepForm() {
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent className=' text-muted'>
-                    <SelectItem value="llama-7b">llama-7b</SelectItem>
-                    <SelectItem value="llama-32b">llama-32b</SelectItem>
-                    <SelectItem value="llama-64b">llama-64b</SelectItem>
+                    {(modelsListData?.data || []).map((item: string) => {
+                      return <SelectItem key={item} value={item}>{item}</SelectItem>;
+                    })}
                   </SelectContent>
                 </Select>
        
@@ -129,7 +310,7 @@ export default function StepForm() {
                 <AccordionContent className='flex flex-col gap-2'>
                      <FormField
                     control={form.control}
-                    name="Temperature"
+                    name="temperature"
                     defaultValue={[0.7]}
                     render={({field}) => (
                       <FormItem>
@@ -152,7 +333,7 @@ export default function StepForm() {
                   />
                                        <FormField
                     control={form.control}
-                    name="top"
+                    name="top_p"
                     defaultValue={[1]}
                     render={({field}) => (
                       <FormItem>
@@ -174,7 +355,7 @@ export default function StepForm() {
                   />
                   <FormField
                     control={form.control}
-                    name="max"
+                    name="max_tokens"
                     defaultValue={[1024]}
                     render={({field}) => (
                       <FormItem>
@@ -210,19 +391,23 @@ export default function StepForm() {
                 <FormField
                   control={form.control}
                     name="promote"
+                    rules={{
+                      required: true,
+                    }}
+                    defaultValue={"What is ai?"}
                     render={({field}) => (
                       <FormItem className='flex-grow'>
                         <FormLabel>
                         </FormLabel>
                         <FormControl>
-                          <Input placeholder='What is ai?' className=' bg-transparent border-none w-full' {...field}/>
+                          <Input placeholder='What is ai?' className=' bg-transparent border-none w-full placeholder:text-gray-500' {...field}/>
                         </FormControl>
                         <FormDescription />
                         <FormMessage />
                       </FormItem>
                     )}
                   />
-                  <Button disabled={loading} className='bg-linear-main  text-white disabled:opacity-50'
+                  <Button disabled={loading || !values?.promote} className='bg-linear-main  text-white disabled:opacity-50'
                     onClick={form.handleSubmit(submit)}
                   >
                     Interface
@@ -239,44 +424,46 @@ export default function StepForm() {
         <div className='text-[#BEC0C1] my-2'>
           {'Similarity score: The value range is between -1 and 1. The closer the value is to 1, the more similar the results are.'}
         </div>
-        <div>
-          <div className='flex items-center justify-end mb-2'>
-            <div>
-              <span className='text-[#BEC0C1]'>Your score</span>
-              <span className=' text-white font-bold text-2xl ml-2'>0.9</span>
+        <div className=' h-40'>
+          {loading ?           <div className=' w-full h-full flex items-center justify-center'>
+            <LoaderIcon className=' animate-spin' /> 
+</div>: <>
+            <div className='flex items-center justify-end mb-2'>
+              <div>
+                <span className='text-[#BEC0C1]'>Your score</span>
+                <span className=' text-white font-bold text-2xl ml-2'>{(qualityData?.[0]?.[1] || 0)}</span>
+              </div>
             </div>
-          </div>
-            <CompareSlider className=' bg-linear-main rounded-full h-5' min={-1} defaultValue={[0]} max={1} step={0.1} value={loading ? [0] : [0.9]} />
-            <div className=' grid grid-cols-3 h-20 text-sm'>
-              <div className=' self-center flex flex-col items-center justify-center'>
-                <div>
-                  Negative
+              <CompareSlider className=' bg-linear-main rounded-full h-5' min={-1} defaultValue={[0]} max={1} step={0.1} value={loading ? [0] : [(qualityData?.[0]?.[1] || 0)]} />
+              <div className=' grid grid-cols-3 h-20 text-sm'>
+                <div className=' self-center flex flex-col items-center justify-center'>
+                  <div>
+                    Negative
+                  </div>
+                  <div>
+                    strong correlation
+                  </div>
                 </div>
-                <div>
-                  strong correlation
+                <div className=' self-center flex flex-col items-center justify-center'>
+                  <div>
+                    Weak
+                  </div>
+                  <div>
+                    correlation
+                  </div>
                 </div>
-              </div>
-              <div className=' self-center flex flex-col items-center justify-center'>
-                <div>
-                  Weak
+                <div className=' self-center flex flex-col items-center justify-center'>
+                  <div>
+                  Positive
+                  </div>
+                  <div>
+                    strong correlation
+                  </div>
                 </div>
-                <div>
-                  correlation
-                </div>
-              </div>
-              <div className=' self-center flex flex-col items-center justify-center'>
-                <div>
-                Positive
-                </div>
-                <div>
-                  strong correlation
-                </div>
-              </div>
 
-            </div>
-          <div>
+              </div>
+          </>}
 
-          </div>
         </div>
       </div>
       <div>
@@ -286,26 +473,32 @@ export default function StepForm() {
         </div>
         <div className='grid grid-cols-1 sm:grid-cols-2 gap-6 mt-6'>
           <div className=' h-80 bg-black rounded-xl p-4'>
-            {loading ? <div className=' w-full h-full flex items-center justify-center'><LoaderIcon className=' animate-spin' /></div> : <div>
-              <div className=' text-white font-bold text-xl'>
-                {`llama-7b on CPU`}
-              </div>
-              <div className=' text-sm text-[#BEC0C1] font-light mt-2 overflow-y-scroll'>
-                {'AI stands for "Artificial Intelligence." It refers to the development of computer systems that can perform tasks that typically require human intelligence, such as visual perception, speech recognition, decision-making, and language translation. AI can be achieved through a combination of techniques such as machine learning, natural language processing, computer vision, and robotics. The ultimate goal of AI research is to create machines that can think and learn like humans, and can even exceed human capabilities in certain areas.'}
-              </div>
+            <div className=' text-white font-bold text-xl mb-2'>
+                {`On CPU`}
+             </div>
+             <div className=' h-60 overflow-y-scroll'>
+              {loading ? <div className=' w-full h-full flex items-center justify-center'><LoaderIcon className=' animate-spin' /></div> : <div className='h-full'>
+                <div className=' text-sm text-[#BEC0C1] font-light mt-2 overflow-y-scroll'>
+                  {dispatchResult?.text}
+                </div>
 
-            </div> }
+              </div> }
+             </div>
+    
           </div>
           <div className=' h-80 bg-black rounded-xl p-4'>
-            {loading ? <div className=' w-full h-full flex items-center justify-center'><LoaderIcon className=' animate-spin' /></div> : <div>
-              <div className=' text-white font-bold text-xl'>
-                {`llama-7b on GPU`}
-              </div>
-              <div className=' text-sm text-[#BEC0C1] font-light mt-2 overflow-y-scroll'>
-                {'AI stands for "Artificial Intelligence." It refers to the development of computer systems that can perform tasks that typically require human intelligence, such as visual perception, speech recognition, decision-making, and language translation. AI can be achieved through a combination of techniques such as machine learning, natural language processing, computer vision, and robotics. The ultimate goal of AI research is to create machines that can think and learn like humans, and can even exceed human capabilities in certain areas.'}
-              </div>
+            <div className=' text-white font-bold text-xl mb-2'>
+                {`On GPU`}
+             </div>
+             <div className=' h-60 overflow-y-scroll'>
+              {loading ? <div className=' w-full h-full flex items-center justify-center'><LoaderIcon className=' animate-spin' /></div> : <div className='h-full'>
+                <div className=' text-sm text-[#BEC0C1] font-light mt-2 overflow-y-scroll'>
+                  {gpuResult?.text}
+                </div>
 
-            </div> }
+              </div> }
+             </div>
+    
           </div>
 
         </div>
@@ -318,11 +511,16 @@ export default function StepForm() {
           <ModelCompareItem
             isLoading={loading}
             icon={<AlarmClockIcon className='h-4 w-4' />}
+            content={`${dispatchResult?.delay || '~'} S`}
+            name={modelName}
+            isActive={dispatchResult?.delay && gpuResult?.delay && Number(dispatchResult?.delay) < Number(gpuResult?.delay) }
            />
           <ModelCompareItem 
           isLoading={loading}
           icon={<AlarmClockIcon className='h-4 w-4' />}
-          content={'82 S'}
+          content={`${gpuResult?.delay || '~'} S`}
+          name={modelName}
+          isActive={dispatchResult?.delay && gpuResult?.delay && Number(gpuResult?.delay) < Number(dispatchResult?.delay) }
           />
         </div>
       </div>
@@ -336,14 +534,17 @@ export default function StepForm() {
         <div className=' grid grid-cols-1 sm:grid-cols-2 gap-6'>
           <ModelCompareItem 
             isLoading={loading}
-            isActive
             icon={<AwardIcon className='h-4 w-4' />}
-            content={'82 S'}
+            content={`${qualityData?.[0]?.[0] || '~'}`}
+            name={modelName}
+            isActive={qualityData?.[0]?.[0] && qualityData?.[0]?.[1] && Number(qualityData?.[0]?.[0]) > Number(qualityData?.[0]?.[1]) }
           />
           <ModelCompareItem 
             isLoading={loading}
             icon={<AwardIcon className='h-4 w-4' />}
-            content={'82 S'}
+            content={`${qualityData?.[0]?.[1] || '~'}`}
+            name={modelName}
+            isActive={qualityData?.[0]?.[0] && qualityData?.[0]?.[1] && Number(qualityData?.[0]?.[1]) > Number(qualityData?.[0]?.[0]) }
           />
         </div>
       </div>
