@@ -20,12 +20,13 @@ import useSWR from 'swr/immutable';
 import { BASE_API_ENDPOINT, BASE_GPU_ENDPOINT, BASE_QUALITY_ENDPOINT } from '@/config/base';
 import {nanoid} from 'nanoid'
 import { fetchDispatcher, fetchGpu, fetchModelList, fetchScore } from '@/config/api';
-
+import { useCountdown } from 'usehooks-ts'
 export interface ModelCompareItemProps {
   icon?: ReactNode;
   name?: string;
   isActive?: boolean;
   isLoading?: boolean;
+  loadingText?: ReactNode;
   content?: ReactNode
 }
 
@@ -35,6 +36,7 @@ export const ModelCompareItem = ({
   isActive,
   isLoading,
   content,
+  loadingText = '',
 }: ModelCompareItemProps) => {
   return <div>
   <div className='mb-1 h-6 truncate'>
@@ -47,7 +49,11 @@ export const ModelCompareItem = ({
     <div className={clsx('bg-[#15171B] h-10 rounded flex items-center justify-center', {
       'bg-[#383838]': isActive
     })}>
-      {isLoading ? <LoaderIcon className=' animate-spin' /> : <div className='flex items-center justify-center gap-2 text-[#BEC0C1]'>
+      {isLoading ?
+      <div className='flex items-center justify-center'>
+        <LoaderIcon className=' animate-spin h-6 w-6' /> <span className='ml-1'>{loadingText}</span>
+      </div>
+       : <div className='flex items-center justify-center gap-2 text-[#BEC0C1]'>
         {icon} {content}
         </div>}
     </div>
@@ -82,6 +88,14 @@ export default function StepForm() {
   const [dispatchLoading, setDispatchLoading] = useState(false);
   
   const [dispatchResult, setDispatchResult] = useState<any>();
+  const [intervalValue, setIntervalValue] = useState<number>(1000)
+  const [count, { startCountdown, stopCountdown, resetCountdown }] =useCountdown({
+      countStart: 0,
+      countStop: Infinity,
+      intervalMs: intervalValue,
+      isIncrement: true,
+    });
+    console.log('count', count);
   const handleQueryDispatcher = useCallback(async(values: any) => {
     let result = {};
     setDispatchLoading(true);
@@ -205,6 +219,8 @@ export default function StepForm() {
   const submit = useCallback(async () => {
     setLoading(true)
     try {
+      resetCountdown();
+      startCountdown();
       const values = form.getValues();
 
       console.log('values', values);
@@ -260,9 +276,11 @@ export default function StepForm() {
     } catch (error) {
       
     }
+    resetCountdown();
+    stopCountdown();
     setLoading(false);
     console.log(form.getValues());
-  }, [form, handleQueryDispatcher, handleQueryGpu, handleQueryQuality])
+  }, [form, handleQueryDispatcher, handleQueryGpu, handleQueryQuality, resetCountdown, startCountdown, stopCountdown])
 
   console.log('setGpuResult', gpuResult)
   return (
@@ -518,6 +536,7 @@ export default function StepForm() {
             icon={<AlarmClockIcon className='h-4 w-4' />}
             content={`${dispatchResult?.delay || '~'} S`}
             name={modelName}
+            loadingText={`${count} S`}
             isActive={!dispatchLoading && dispatchResult?.delay && gpuResult?.delay && Number(dispatchResult?.delay) < Number(gpuResult?.delay) }
            />
           <ModelCompareItem 
@@ -525,6 +544,7 @@ export default function StepForm() {
           icon={<AlarmClockIcon className='h-4 w-4' />}
           content={`${gpuResult?.delay || '~'} S`}
           name={modelName}
+          loadingText={`${count} S`}
           isActive={ !gpuLoading && dispatchResult?.delay && gpuResult?.delay && Number(gpuResult?.delay) < Number(dispatchResult?.delay) }
           />
         </div>
