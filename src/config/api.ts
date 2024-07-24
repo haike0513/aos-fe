@@ -58,12 +58,12 @@ export const fetchGpu = async (data?: any) => {
       //   console.log(data) 
       // })
   const result = {
-    delay: 5,
+    delay: 11,
     text: `AI stands for "Artificial Intelligence." It is a broad field of computer science that aims to create intelligent machines that can think and learn like humans. AI can be achieved through a combination of techniques such as machine learning, natural language processing, computer vision, and robotics. The ultimate goal of AI research is to develop machines that can reason, learn, and adapt to new situations in a way that is similar to human intelligence.`,
   }
   return await delayData({data: {
     result
-  }},5000)
+  }},11000)
 }
 
 export const fetchScore = async () => {
