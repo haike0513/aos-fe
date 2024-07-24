@@ -15,7 +15,7 @@ export const fetchDispatcher = async () => {
   }
   return await delayData({data: {
     result
-  }},5000)
+  }},50000)
 }
 
 export const fetchGpu = async () => {
