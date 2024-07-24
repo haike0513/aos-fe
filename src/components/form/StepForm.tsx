@@ -523,7 +523,12 @@ export default function StepForm() {
              <div className=' h-60 overflow-y-scroll' style={{
               scrollbarWidth: 'none',
              }}>
-              {dispatchLoading ? <div className=' w-full h-full flex items-center justify-center'><LoaderIcon className=' animate-spin' /></div> : <div className='h-full'>
+              {dispatchLoading ? <div className=' w-full h-full flex flex-col items-center justify-center'>
+                <LoaderIcon className=' animate-spin' />
+                <div className=' text-xs text-[#BEC0C1] text-center mt-2'>
+                  {'this model running on cpu machine，it will take 1 minutes to get result，please wait patient'}
+                </div>
+                </div> : <div className='h-full'>
                 <div className=' text-sm text-[#BEC0C1] font-light mt-2 overflow-y-scroll'>
                   {dispatchResult?.text}
                 </div>
