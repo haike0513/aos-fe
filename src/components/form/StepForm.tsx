@@ -19,7 +19,7 @@ import axios from 'axios';
 import useSWR from 'swr/immutable';
 import { BASE_API_ENDPOINT, BASE_GPU_ENDPOINT, BASE_QUALITY_ENDPOINT } from '@/config/base';
 import {nanoid} from 'nanoid'
-import { fetchDispatcher, fetchGpu, fetchModelList } from '@/config/api';
+import { fetchDispatcher, fetchGpu, fetchModelList, fetchScore } from '@/config/api';
 
 export interface ModelCompareItemProps {
   icon?: ReactNode;
@@ -106,7 +106,7 @@ export default function StepForm() {
       //   conversation_id: '11',
       //   params: values?.params,
       // }
-      // const rs = await axios.post(`${BASE_API_ENDPOINT}/api/question`, data) ;
+      // const rs1 = await axios.post(`${BASE_API_ENDPOINT}/api/question`, data) ;
       const rs = await fetchDispatcher() ;
 
       console.log('question', rs);
@@ -181,7 +181,7 @@ export default function StepForm() {
 
   const [qualityLoading, setQualityLoading] = useState(false);
 
-  const [qualityData, setQualityData] = useState();
+  const [qualityData, setQualityData] = useState<any>();
   const handleQueryQuality = useCallback(async(values: any) => {
     setQualityLoading(true);
     try {
@@ -191,7 +191,8 @@ export default function StepForm() {
         dr?.text,
         gr?.text,
       ];
-      const rs = await axios.post(`${BASE_QUALITY_ENDPOINT}/similarity`,data, {signal: controller.signal})
+      // const rs = await axios.post(`${BASE_QUALITY_ENDPOINT}/similarity`,data, {signal: controller.signal})
+      const rs = await fetchScore();
       console.log('handleQueryQuality', rs);
       setQualityData(rs.data);
 
@@ -226,11 +227,11 @@ export default function StepForm() {
       //   postParams.params = params;
       // };
 
-      await new Promise((resolve) => {
-        setTimeout(() => {
-          resolve(true)
-        }, 1000);
-      });
+      // await new Promise((resolve) => {
+      //   setTimeout(() => {
+      //     resolve(true)
+      //   }, 1000);
+      // });
 
       const rs = await Promise.all([
         handleQueryDispatcher(postParams), 
@@ -473,11 +474,13 @@ export default function StepForm() {
         </div>
         <div className='grid grid-cols-1 sm:grid-cols-2 gap-6 mt-6'>
           <div className=' h-80 bg-black rounded-xl p-4'>
-            <div className=' text-white font-bold text-xl mb-2'>
-                {`On CPU`}
+            <div className=' text-white font-bold text-xl mb-2 flex items-center'>
+              <span className=' max-w-40 truncate ml-1'>{modelName}</span> { `On CPU`}
              </div>
-             <div className=' h-60 overflow-y-scroll'>
-              {loading ? <div className=' w-full h-full flex items-center justify-center'><LoaderIcon className=' animate-spin' /></div> : <div className='h-full'>
+             <div className=' h-60 overflow-y-scroll' style={{
+              scrollbarWidth: 'none',
+             }}>
+              {dispatchLoading ? <div className=' w-full h-full flex items-center justify-center'><LoaderIcon className=' animate-spin' /></div> : <div className='h-full'>
                 <div className=' text-sm text-[#BEC0C1] font-light mt-2 overflow-y-scroll'>
                   {dispatchResult?.text}
                 </div>
@@ -487,11 +490,13 @@ export default function StepForm() {
     
           </div>
           <div className=' h-80 bg-black rounded-xl p-4'>
-            <div className=' text-white font-bold text-xl mb-2'>
-                {`On GPU`}
+            <div className=' text-white font-bold text-xl mb-2 flex items-center'>
+              <span className=' max-w-40 truncate ml-1'>{modelName}</span> { `On GPU`}
              </div>
-             <div className=' h-60 overflow-y-scroll'>
-              {loading ? <div className=' w-full h-full flex items-center justify-center'><LoaderIcon className=' animate-spin' /></div> : <div className='h-full'>
+             <div className=' h-60 overflow-y-scroll'  style={{
+              scrollbarWidth: 'none',
+             }}>
+              {gpuLoading ? <div className=' w-full h-full flex items-center justify-center'><LoaderIcon className=' animate-spin' /></div> : <div className='h-full'>
                 <div className=' text-sm text-[#BEC0C1] font-light mt-2 overflow-y-scroll'>
                   {gpuResult?.text}
                 </div>
@@ -509,18 +514,18 @@ export default function StepForm() {
         </div>
         <div className=' grid grid-cols-1 sm:grid-cols-2 gap-6'>
           <ModelCompareItem
-            isLoading={loading}
+            isLoading={dispatchLoading}
             icon={<AlarmClockIcon className='h-4 w-4' />}
             content={`${dispatchResult?.delay || '~'} S`}
             name={modelName}
-            isActive={dispatchResult?.delay && gpuResult?.delay && Number(dispatchResult?.delay) < Number(gpuResult?.delay) }
+            isActive={!dispatchLoading && dispatchResult?.delay && gpuResult?.delay && Number(dispatchResult?.delay) < Number(gpuResult?.delay) }
            />
           <ModelCompareItem 
-          isLoading={loading}
+          isLoading={gpuLoading}
           icon={<AlarmClockIcon className='h-4 w-4' />}
           content={`${gpuResult?.delay || '~'} S`}
           name={modelName}
-          isActive={dispatchResult?.delay && gpuResult?.delay && Number(gpuResult?.delay) < Number(dispatchResult?.delay) }
+          isActive={ !gpuLoading && dispatchResult?.delay && gpuResult?.delay && Number(gpuResult?.delay) < Number(dispatchResult?.delay) }
           />
         </div>
       </div>
@@ -537,14 +542,14 @@ export default function StepForm() {
             icon={<AwardIcon className='h-4 w-4' />}
             content={`${qualityData?.[0]?.[0] || '~'}`}
             name={modelName}
-            isActive={qualityData?.[0]?.[0] && qualityData?.[0]?.[1] && Number(qualityData?.[0]?.[0]) > Number(qualityData?.[0]?.[1]) }
+            isActive={ !loading && qualityData?.[0]?.[0] && qualityData?.[0]?.[1] && Number(qualityData?.[0]?.[0]) > Number(qualityData?.[0]?.[1]) }
           />
           <ModelCompareItem 
             isLoading={loading}
             icon={<AwardIcon className='h-4 w-4' />}
             content={`${qualityData?.[0]?.[1] || '~'}`}
             name={modelName}
-            isActive={qualityData?.[0]?.[0] && qualityData?.[0]?.[1] && Number(qualityData?.[0]?.[1]) > Number(qualityData?.[0]?.[0]) }
+            isActive={ !loading && qualityData?.[0]?.[0] && qualityData?.[0]?.[1] && Number(qualityData?.[0]?.[1]) > Number(qualityData?.[0]?.[0]) }
           />
         </div>
       </div>
