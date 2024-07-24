@@ -19,7 +19,7 @@ import axios from 'axios';
 import useSWR from 'swr/immutable';
 import { BASE_API_ENDPOINT, BASE_GPU_ENDPOINT, BASE_QUALITY_ENDPOINT } from '@/config/base';
 import {nanoid} from 'nanoid'
-import { fetchDispatcher, fetchGpu, fetchModelList, fetchScore } from '@/config/api';
+import { fetchDispatcher, fetchGpu, fetchModelList, fetchScore, fetchSimilarity, fetchSbertScore } from '@/config/api';
 import { useCountdown } from 'usehooks-ts'
 export interface ModelCompareItemProps {
   icon?: ReactNode;
@@ -206,7 +206,7 @@ export default function StepForm() {
         gr?.text,
       ];
       // const rs = await axios.post(`${BASE_QUALITY_ENDPOINT}/similarity`,data, {signal: controller.signal})
-      const rs = await fetchScore();
+      const rs = await fetchSimilarity();
       console.log('handleQueryQuality', rs);
       setQualityData(rs.data);
 
@@ -214,6 +214,30 @@ export default function StepForm() {
       
     }
     setQualityLoading(false);
+  }, []);
+
+
+  const [sbertLoading, setSbertLoading] = useState(false);
+
+  const [sbertData, setSbertData] = useState<any>();
+  const handleQuerySbertScore = useCallback(async(values: any, promote?: string) => {
+    setSbertLoading(true);
+    try {
+      const [dr, gr] = values;
+      console.log('handleQueryQuality', values);
+      const data = [
+       [promote, dr?.text],
+       [promote, gr?.text]
+      ];
+      // const rs = await axios.post(`${BASE_QUALITY_ENDPOINT}/score`,data, {signal: controller.signal})
+      const rs = await fetchSbertScore();
+      // console.log('handleQuerySbertScore', rs);
+      setSbertData(rs.data);
+
+    } catch (error) {
+      
+    }
+    setSbertLoading(false);
   }, []);
 
   const submit = useCallback(async () => {
@@ -255,6 +279,7 @@ export default function StepForm() {
       ]);
 
       await handleQueryQuality(rs);
+      await handleQuerySbertScore(rs, values.promote);
 
 
       // const data: any = {
@@ -280,7 +305,7 @@ export default function StepForm() {
     stopCountdown();
     setLoading(false);
     console.log(form.getValues());
-  }, [form, handleQueryDispatcher, handleQueryGpu, handleQueryQuality, resetCountdown, startCountdown, stopCountdown])
+  }, [form, handleQueryDispatcher, handleQueryGpu, handleQueryQuality, handleQuerySbertScore, resetCountdown, startCountdown, stopCountdown])
 
   console.log('setGpuResult', gpuResult)
   return (
@@ -560,16 +585,16 @@ export default function StepForm() {
           <ModelCompareItem 
             isLoading={loading}
             icon={<AwardIcon className='h-4 w-4' />}
-            content={`${qualityData?.[0]?.[0] || '~'}`}
+            content={`${sbertData?.[0]?.score || '~'}`}
             name={modelName}
-            isActive={ !loading && qualityData?.[0]?.[0] && qualityData?.[0]?.[1] && Number(qualityData?.[0]?.[0]) > Number(qualityData?.[0]?.[1]) }
+            isActive={ !loading && sbertData?.[0]?.score && sbertData?.[1]?.score && Number(sbertData?.[0]?.score) > Number(sbertData?.[1]?.score) }
           />
           <ModelCompareItem 
             isLoading={loading}
             icon={<AwardIcon className='h-4 w-4' />}
-            content={`${qualityData?.[0]?.[1] || '~'}`}
+            content={`${sbertData?.[1]?.score || '~'}`}
             name={modelName}
-            isActive={ !loading && qualityData?.[0]?.[0] && qualityData?.[0]?.[1] && Number(qualityData?.[0]?.[1]) > Number(qualityData?.[0]?.[0]) }
+            isActive={ !loading && sbertData?.[0]?.score && sbertData?.[1]?.score && Number(sbertData?.[1]?.score) > Number(sbertData?.[0]?.score) }
           />
         </div>
       </div>
