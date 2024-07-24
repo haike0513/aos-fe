@@ -67,7 +67,7 @@ const controller = new AbortController();
 
 const fetcher = async(url: string) => {
   // const rs = await axios.post(`${BASE_API_ENDPOINT}${url}`)
-  const rs = await fetchModelList()
+  const rs = await fetchModelList(url)
   return rs.data;
 }
 
@@ -121,7 +121,7 @@ export default function StepForm() {
       //   params: values?.params,
       // }
       // const rs1 = await axios.post(`${BASE_API_ENDPOINT}/api/question`, data) ;
-      const rs = await fetchDispatcher() ;
+      const rs = await fetchDispatcher(data) ;
 
       console.log('question', rs);
       result = rs.data?.result || {};
@@ -182,7 +182,7 @@ export default function StepForm() {
       //   data = data.toString()
       //   console.log(data) 
       // })
-      const rs = await fetchGpu();
+      const rs = await fetchGpu(data);
       result = rs.data?.result || {};
       setGpuResult(result);
     } catch (error) {
@@ -206,7 +206,7 @@ export default function StepForm() {
         gr?.text,
       ];
       // const rs = await axios.post(`${BASE_QUALITY_ENDPOINT}/similarity`,data, {signal: controller.signal})
-      const rs = await fetchSimilarity();
+      const rs = await fetchSimilarity(data);
       console.log('handleQueryQuality', rs);
       setQualityData(rs.data);
 
@@ -230,7 +230,7 @@ export default function StepForm() {
        [promote, gr?.text]
       ];
       // const rs = await axios.post(`${BASE_QUALITY_ENDPOINT}/score`,data, {signal: controller.signal})
-      const rs = await fetchSbertScore();
+      const rs = await fetchSbertScore(data);
       // console.log('handleQuerySbertScore', rs);
       setSbertData(rs.data);
 
@@ -463,56 +463,6 @@ export default function StepForm() {
       <div>
         <div className=' font-bold'>
           <span className='bg-linear-text text-xl'>Step 2：</span>
-          <span className=' text-white text-xl'>compare consistency</span>
-        </div>
-        <div className='text-[#BEC0C1] my-2'>
-          {'Similarity score: The value range is between -1 and 1. The closer the value is to 1, the more similar the results are.'}
-        </div>
-        <div className=' h-40'>
-          {loading ?           <div className=' w-full h-full flex items-center justify-center'>
-            <LoaderIcon className=' animate-spin' /> 
-</div>: <>
-            <div className='flex items-center justify-end mb-2'>
-              <div>
-                <span className='text-[#BEC0C1]'>Your score</span>
-                <span className=' text-white font-bold text-2xl ml-2'>{(qualityData?.[0]?.[1] || 0)}</span>
-              </div>
-            </div>
-              <CompareSlider className=' bg-linear-main rounded-full h-5' min={-1} defaultValue={[0]} max={1} step={0.1} value={loading ? [0] : [(qualityData?.[0]?.[1] || 0)]} />
-              <div className=' grid grid-cols-3 h-20 text-sm'>
-                <div className=' self-center flex flex-col items-center justify-center'>
-                  <div>
-                    Negative
-                  </div>
-                  <div>
-                    strong correlation
-                  </div>
-                </div>
-                <div className=' self-center flex flex-col items-center justify-center'>
-                  <div>
-                    Weak
-                  </div>
-                  <div>
-                    correlation
-                  </div>
-                </div>
-                <div className=' self-center flex flex-col items-center justify-center'>
-                  <div>
-                  Positive
-                  </div>
-                  <div>
-                    strong correlation
-                  </div>
-                </div>
-
-              </div>
-          </>}
-
-        </div>
-      </div>
-      <div>
-        <div className=' font-bold'>
-          <span className='bg-linear-text text-xl'>Step 3：</span>
           <span className=' text-white text-xl'>compare quality</span>
         </div>
         <div className='grid grid-cols-1 sm:grid-cols-2 gap-6 mt-6'>
@@ -601,6 +551,56 @@ export default function StepForm() {
             name={modelName}
             isActive={ !loading && sbertData?.[0]?.score && sbertData?.[1]?.score && Number(sbertData?.[1]?.score) > Number(sbertData?.[0]?.score) }
           />
+        </div>
+      </div>
+      <div>
+        <div className=' font-bold'>
+          <span className='bg-linear-text text-xl'>Step 3：</span>
+          <span className=' text-white text-xl'>compare consistency</span>
+        </div>
+        <div className='text-[#BEC0C1] my-2'>
+          {'Similarity score: The value range is between -1 and 1. The closer the value is to 1, the more similar the results are.'}
+        </div>
+        <div className=' h-40'>
+          {loading ?           <div className=' w-full h-full flex items-center justify-center'>
+            <LoaderIcon className=' animate-spin' /> 
+</div>: <>
+            <div className='flex items-center justify-end mb-2'>
+              <div>
+                <span className='text-[#BEC0C1]'>Your score</span>
+                <span className=' text-white font-bold text-2xl ml-2'>{(qualityData?.[0]?.[1] || 0)}</span>
+              </div>
+            </div>
+              <CompareSlider className=' bg-linear-main rounded-full h-5' min={-1} defaultValue={[0]} max={1} step={0.1} value={loading ? [0] : [(qualityData?.[0]?.[1] || 0)]} />
+              <div className=' grid grid-cols-3 h-20 text-sm'>
+                <div className=' self-center flex flex-col items-center justify-center'>
+                  <div>
+                    Negative
+                  </div>
+                  <div>
+                    strong correlation
+                  </div>
+                </div>
+                <div className=' self-center flex flex-col items-center justify-center'>
+                  <div>
+                    Weak
+                  </div>
+                  <div>
+                    correlation
+                  </div>
+                </div>
+                <div className=' self-center flex flex-col items-center justify-center'>
+                  <div>
+                  Positive
+                  </div>
+                  <div>
+                    strong correlation
+                  </div>
+                </div>
+
+              </div>
+          </>}
+
         </div>
       </div>
     </div>
