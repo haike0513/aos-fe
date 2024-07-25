@@ -3,12 +3,12 @@ import { delayData } from "./utils"
 import { BASE_API_ENDPOINT, BASE_GPU_ENDPOINT, BASE_QUALITY_ENDPOINT } from "./base"
 
 export const fetchModelList = async (url: string) => {
-  const rs = await axios.post(`${BASE_API_ENDPOINT}${url}`);
-  return rs;
-  // return await delayData({
-  //   data:[
-  //   "llama-2-7b-chat.Q4_0.gguf"
-  // ]},500)
+  // const rs = await axios.post(`${BASE_API_ENDPOINT}${url}`);
+  // return rs;
+  return await delayData({
+    data:[
+    "llama-2-7b-chat.Q4_0.gguf"
+  ]},500)
 }
 
 
