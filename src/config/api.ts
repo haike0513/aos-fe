@@ -98,8 +98,8 @@ export const fetchSimilarity = async (params: any[]) => {
 }
 
 export const fetchSbertScore = async (params: any[]) => {
-      const rs = await axios.post(`${BASE_QUALITY_ENDPOINT}/score`,params)
-      console.log('fetchSbertScore', rs);
+      // const rs = await axios.post(`${BASE_QUALITY_ENDPOINT}/score`,params)
+      // console.log('fetchSbertScore', rs);
 
   const data = [
     {
