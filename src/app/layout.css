@@ -7,5 +7,8 @@
     background: linear-gradient(144.58644919340165deg, #7280F4 0%, #F15F86 100%);
     @apply  bg-clip-text;
     -webkit-text-fill-color: transparent;
+  }
+  .bg-linear-second{
+    background: linear-gradient( 90deg, #f060896e 0%, #837ce66e 100%);
   }  
 }

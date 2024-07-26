@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter, Poppins } from "next/font/google";
 import "./globals.css";
 import "./layout.css";
+import Header from "@/components/layout/Header";
  
 type Props = {
   params: { id: string }
@@ -31,7 +32,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="dark">
-      <body className={popins.className}>{children}</body>
+      <body className={popins.className}>
+        <div className="fixed w-screen z-40">
+            <Header />
+        </div>
+        <main className=" min-h-screen mx-4 sm:mx-auto py-16 sm:py-32">
+          {children}
+        </main>
+      </body>
     </html>
   );
 }

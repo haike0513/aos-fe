@@ -1,6 +1,6 @@
-import StepForm from "@/components/form/StepForm";
-import HeadDescription from "@/components/home/HeadDescription";
-import HeadTitle from "@/components/home/HeadTitle";
+import StepForm from "@/components/opml/OPMLForm";
+import HeadDescription from "@/components/opml/HeadDescription";
+import HeadTitle from "@/components/opml/HeadTitle";
 import Image from "next/image";
 
 export default function Home() {
