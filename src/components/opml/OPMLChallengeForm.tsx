@@ -13,13 +13,13 @@ import { Input } from '../ui/input';
 import { Button } from '../ui/button';
 import clsx from 'clsx';
 import { AlarmClockIcon, AwardIcon, LoaderIcon } from 'lucide-react';
-import { ReactNode, useCallback, useState } from 'react';
+import { ReactNode, useCallback, useEffect, useMemo, useState } from 'react';
 import {Slider as CompareSlider } from '../form/slider';
 import axios from 'axios';
 import useSWR from 'swr/immutable';
 import { BASE_API_ENDPOINT, BASE_GPU_ENDPOINT, BASE_QUALITY_ENDPOINT } from '@/config/base';
 import {nanoid} from 'nanoid'
-import { fetchDispatcher, fetchGpu, fetchModelList, fetchScore, fetchSimilarity, fetchSbertScore } from '@/config/api';
+import { fetchDispatcher, fetchGpu, fetchModelList, fetchScore, fetchSimilarity, fetchSbertScore } from '@/config/api/opml';
 import { useCountdown } from 'usehooks-ts'
 export interface ModelCompareItemProps {
   icon?: ReactNode;
@@ -38,7 +38,7 @@ export const ModelCompareItem = ({
   content,
   loadingText = '',
 }: ModelCompareItemProps) => {
-  return <div>
+  return <div className=' truncate'>
   <div className='mb-1 h-6 truncate'>
     {name || ''}
   </div>
@@ -46,14 +46,14 @@ export const ModelCompareItem = ({
     'bg-linear-main': isActive,
     'bg-[#15171B]': !isActive,
   })}>
-    <div className={clsx('bg-[#15171B] h-10 rounded flex items-center justify-center', {
+    <div className={clsx('bg-[#15171B] h-10 rounded flex items-center justify-center truncate', {
       'bg-[#383838]': isActive
     })}>
       {isLoading ?
       <div className='flex items-center justify-center'>
         <LoaderIcon className=' animate-spin h-6 w-6' /> <span className='ml-1'>{loadingText}</span>
       </div>
-       : <div className='flex items-center justify-center gap-2 text-[#BEC0C1]'>
+       : <div className='flex items-center justify-center gap-2 text-[#BEC0C1] truncate text-sm'>
         {icon} {content}
         </div>}
     </div>
@@ -71,11 +71,22 @@ const fetcher = async(url: string) => {
   return rs.data;
 }
 
-export default function StepForm() {
+export interface StepFormProps {
+  promote?: string;
+  model?: string;
+}
+
+export default function StepForm({
+  promote,
+  model,
+}: StepFormProps) {
   const form = useForm();
   const values = useWatch({
     control: form.control,
   });
+  useEffect(() => {
+    form.setValue('model', model);
+  }, [form, model])
   console.log(values);
   const [loading, setLoading] = useState(false);
 

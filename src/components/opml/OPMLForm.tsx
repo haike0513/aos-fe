@@ -44,59 +44,9 @@ import {
   fetchScore,
   fetchSimilarity,
   fetchSbertScore,
-} from "@/config/api";
+} from "@/config/api/opml";
 import { useCountdown } from "usehooks-ts";
-import ChallengeForm from "./OPMLChallengeForm";
-export interface ModelCompareItemProps {
-  icon?: ReactNode;
-  name?: string;
-  isActive?: boolean;
-  isLoading?: boolean;
-  loadingText?: ReactNode;
-  content?: ReactNode;
-}
-
-export const ModelCompareItem = ({
-  icon,
-  name,
-  isActive,
-  isLoading,
-  content,
-  loadingText = "",
-}: ModelCompareItemProps) => {
-  return (
-    <div>
-      <div className="mb-1 h-6 truncate">{name || ""}</div>
-      <div
-        className={clsx("rounded-md p-0.5", {
-          "bg-linear-main": isActive,
-          "bg-[#15171B]": !isActive,
-        })}
-      >
-        <div
-          className={clsx(
-            "bg-[#15171B] h-10 rounded flex items-center justify-center",
-            {
-              "bg-[#383838]": isActive,
-            }
-          )}
-        >
-          {isLoading ? (
-            <div className="flex items-center justify-center">
-              <LoaderIcon className=" animate-spin h-6 w-6" />{" "}
-              <span className="ml-1">{loadingText}</span>
-            </div>
-          ) : (
-            <div className="flex items-center justify-center gap-2 text-[#BEC0C1]">
-              {icon} {content}
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-};
-
+import ChallengeForm, {ModelCompareItem} from "./OPMLChallengeForm";
 const controller = new AbortController();
 
 const fetcher = async (url: string) => {
@@ -607,7 +557,7 @@ export default function StepForm() {
               // icon={<AlarmClockIcon className='h-4 w-4' />}
               content={`${dispatchResult?.delay || "~"}`}
               name={modelName}
-              loadingText={`${count} `}
+              loadingText={`${count} S`}
               isActive={
                 !dispatchLoading &&
                 dispatchResult?.delay &&
@@ -634,7 +584,7 @@ export default function StepForm() {
           </div>
         </div>
       </div>
-      <ChallengeForm />
+      <ChallengeForm model={values?.model}/>
     </div>
   );
 }
