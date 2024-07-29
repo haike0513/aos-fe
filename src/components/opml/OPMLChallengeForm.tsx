@@ -488,17 +488,6 @@ export default function StepForm({ promote, model }: StepFormProps) {
           </div>
         </div>
       </div>
-      <div className=" flex w-full items-center justify-center">
-          <Button
-            // disabled={loading || !values?.promote}
-            className="bg-linear-main  text-white disabled:opacity-50 w-40 text-center"
-            onClick={() => {
-              handleNextStep();
-            }}
-          >
-              {stepStatus > 0 ? 'Next' : 'Challenge'}
-              </Button>
-      </div>
       <div>
         <ConfigProvider
             theme={{
@@ -559,6 +548,17 @@ export default function StepForm({ promote, model }: StepFormProps) {
                 </div>
             </div>}
         </ConfigProvider>
+      </div>
+      <div className=" flex w-full items-center justify-center">
+          <Button
+            // disabled={loading || !values?.promote}
+            className="bg-linear-main  text-white disabled:opacity-50 w-40 text-center"
+            onClick={() => {
+              handleNextStep();
+            }}
+          >
+              {stepStatus > 0 ? 'Next' : 'Challenge'}
+              </Button>
       </div>
     </div>
   );

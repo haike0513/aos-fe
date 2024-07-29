@@ -35,7 +35,7 @@ export const fetchDispatcher = async (data?: any) => {
   }
   return await delayData({data: {
     result
-  }},50000)
+  }},10000)
 }
 
 export const fetchGpu = async (data?: any) => {
@@ -63,7 +63,7 @@ export const fetchGpu = async (data?: any) => {
   }
   return await delayData({data: {
     result
-  }},11000)
+  }},10000)
 }
 
 export const fetchScore = async () => {
