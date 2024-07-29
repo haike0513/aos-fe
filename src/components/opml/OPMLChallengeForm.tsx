@@ -44,7 +44,7 @@ import {
   fetchScore,
   fetchSimilarity,
   fetchSbertScore,
-} from "@/config/api/opml";
+} from "@/config/api/opmlChallenge";
 import { useCountdown } from "usehooks-ts";
 import { Steps, ConfigProvider, theme } from 'antd'
 export interface ModelCompareItemProps {
@@ -462,12 +462,12 @@ export default function StepForm({ promote, model }: StepFormProps) {
               content={`${dispatchResult?.delay || "~"}`}
               name={modelName}
               loadingText={`${count} `}
-              isActive={
-                !dispatchLoading &&
-                dispatchResult?.delay &&
-                gpuResult?.delay &&
-                Number(dispatchResult?.delay) < Number(gpuResult?.delay)
-              }
+              // isActive={
+              //   !dispatchLoading &&
+              //   dispatchResult?.delay &&
+              //   gpuResult?.delay &&
+              //   Number(dispatchResult?.delay) < Number(gpuResult?.delay)
+              // }
             />
             <ModelCompareItem
               isLoading={gpuLoading}
@@ -475,12 +475,12 @@ export default function StepForm({ promote, model }: StepFormProps) {
               content={`${gpuResult?.delay || "~"} `}
               name={modelName}
               loadingText={`${count}`}
-              isActive={
-                !gpuLoading &&
-                dispatchResult?.delay &&
-                gpuResult?.delay &&
-                Number(gpuResult?.delay) < Number(dispatchResult?.delay)
-              }
+              // isActive={
+              //   !gpuLoading &&
+              //   dispatchResult?.delay &&
+              //   gpuResult?.delay &&
+              //   Number(gpuResult?.delay) < Number(dispatchResult?.delay)
+              // }
             />
           </div>
           <div className="text-[#BEC0C1] my-10">

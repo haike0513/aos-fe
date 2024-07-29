@@ -558,12 +558,12 @@ export default function StepForm() {
               content={`${dispatchResult?.delay || "~"}`}
               name={modelName}
               loadingText={`${count} S`}
-              isActive={
-                !dispatchLoading &&
-                dispatchResult?.delay &&
-                gpuResult?.delay &&
-                Number(dispatchResult?.delay) < Number(gpuResult?.delay)
-              }
+              // isActive={
+              //   !dispatchLoading &&
+              //   dispatchResult?.delay &&
+              //   gpuResult?.delay &&
+              //   Number(dispatchResult?.delay) < Number(gpuResult?.delay)
+              // }
             />
             <ModelCompareItem
               isLoading={gpuLoading}
@@ -571,12 +571,12 @@ export default function StepForm() {
               content={`${gpuResult?.delay || "~"} `}
               name={modelName}
               loadingText={`${count} S`}
-              isActive={
-                !gpuLoading &&
-                dispatchResult?.delay &&
-                gpuResult?.delay &&
-                Number(gpuResult?.delay) < Number(dispatchResult?.delay)
-              }
+              // isActive={
+              //   !gpuLoading &&
+              //   dispatchResult?.delay &&
+              //   gpuResult?.delay &&
+              //   Number(gpuResult?.delay) < Number(dispatchResult?.delay)
+              // }
             />
           </div>
           <div className="text-[#BEC0C1] my-10">
