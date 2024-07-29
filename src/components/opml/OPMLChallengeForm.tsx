@@ -551,7 +551,7 @@ export default function StepForm({ promote, model }: StepFormProps) {
       </div>
       <div className=" flex w-full items-center justify-center">
           <Button
-            // disabled={loading || !values?.promote}
+            disabled={stepStatus > 4}
             className="bg-linear-main  text-white disabled:opacity-50 w-40 text-center"
             onClick={() => {
               handleNextStep();
