@@ -357,9 +357,9 @@ export default function StepForm({ promote, model }: StepFormProps) {
       <div className=" text-muted">
         <Form {...form}>
           <div className="mt-10">
-            <div className=" text-xl font-bold text-white">promote</div>
+            <div className=" text-xl font-bold text-white">prompt</div>
             <div className="text-[#BEC0C1] font-normal mt-1">
-              please input Inference promote word
+              please input Inference prompt word
             </div>
             <div className="flex justify-between px-2 bg-[#15171B] items-center mt-6 rounded-md">
               <FormField
