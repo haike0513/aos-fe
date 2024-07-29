@@ -65,7 +65,7 @@ export default function StepForm() {
 
   const [data, setData] = useState();
 
-  const [showParam, setShowParam] = useState<string>();
+  const [showParam, setShowParam] = useState<string>('params');
   const [modelName, setModelName] = useState("");
 
   const modelsListData = useSWR("/api/list_models", fetcher);
@@ -325,7 +325,7 @@ export default function StepForm() {
           <div className=" mt-10">
             <Accordion
               type="single"
-              collapsible
+              // collapsible
               value={showParam}
               onValueChange={(e) => setShowParam(e)}
               className=" bg-black rounded-md"
@@ -371,7 +371,7 @@ export default function StepForm() {
                       </FormItem>
                     )}
                   />
-                  <FormField
+                  {/* <FormField
                     control={form.control}
                     name="top_p"
                     defaultValue={[1]}
@@ -441,7 +441,12 @@ export default function StepForm() {
                         <FormMessage />
                       </FormItem>
                     )}
-                  />
+                  /> */}
+                  <div>
+                    <div className="text-[#BEC0C1] font-normal mt-1">
+                      {`Temperature in large language models refers to a sampling parameter that controls the randomness of the model's output. Its value ranges from 0 to 1. Lower temperature values (closer to 0) produce more predictable and repetitive outputs, while higher temperature values (closer to 1) increase the diversity and creativity of the generated text but may also introduce more incoherence or irrelevance.`}
+                    </div>
+                  </div>
                 </AccordionContent>
               </AccordionItem>
             </Accordion>
