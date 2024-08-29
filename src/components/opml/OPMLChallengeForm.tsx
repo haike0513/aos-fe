@@ -389,7 +389,7 @@ export default function StepForm({ promote, model }: StepFormProps) {
                 className="bg-linear-main  text-white disabled:opacity-50"
                 onClick={form.handleSubmit(submit)}
               >
-                Interface
+                Inference
               </Button>
             </div>
           </div>
