@@ -1,5 +1,5 @@
 "use client";
-import { useForm, useWatch } from "react-hook-form";
+import { FieldValues, SubmitErrorHandler, useForm, useWatch } from "react-hook-form";
 import {
   Select,
   SelectContent,
@@ -27,7 +27,7 @@ import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import clsx from "clsx";
 import { AlarmClockIcon, AwardIcon, LoaderIcon } from "lucide-react";
-import { ReactNode, useCallback, useState } from "react";
+import { ReactNode, useCallback, useRef, useState } from "react";
 import { Slider as CompareSlider } from "../form/slider";
 import axios from "axios";
 import useSWR from "swr/immutable";
@@ -277,7 +277,19 @@ export default function StepForm() {
     stopCountdown,
   ]);
 
-  console.log("setGpuResult", gpuResult);
+  const modelRef = useRef(null);
+  const submitInvalid: SubmitErrorHandler<FieldValues> = useCallback((invalid) => {
+    if(invalid.model) {
+      (modelRef.current as any)?.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      })
+    }
+
+    setTimeout(() => {
+      form.clearErrors();
+    }, 2000)
+  }, [form])
   return (
     <div className=" flex flex-col gap-6">
       <div className=" font-bold">
@@ -297,11 +309,11 @@ export default function StepForm() {
                 message: "Model is Require",
               },
             }}
-            render={({ field }) => (
+            render={({ field, fieldState }) => (
               <FormItem>
                 <FormLabel />
                 <Select onValueChange={field.onChange} value={field.value}>
-                  <FormControl>
+                  <FormControl  ref={modelRef} className={fieldState.invalid ? (' border border-red-600') : ''}>
                     <SelectTrigger className="">
                       <SelectValue placeholder="" />
                     </SelectTrigger>
@@ -488,7 +500,7 @@ export default function StepForm() {
               <Button
                 disabled={loading || !values?.promote}
                 className="bg-linear-main  text-white disabled:opacity-50"
-                onClick={form.handleSubmit(submit)}
+                onClick={form.handleSubmit(submit, submitInvalid)}
               >
                 Inference
               </Button>

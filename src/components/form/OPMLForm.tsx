@@ -1,5 +1,5 @@
 'use client';
-import { useForm, useWatch } from 'react-hook-form';
+import { FieldValues, SubmitErrorHandler, useForm, useWatch } from 'react-hook-form';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormDescription, FormMessage } from '../ui/form';
 import {
@@ -307,6 +307,14 @@ export default function StepForm() {
     console.log(form.getValues());
   }, [form, handleQueryDispatcher, handleQueryGpu, handleQueryQuality, handleQuerySbertScore, resetCountdown, startCountdown, stopCountdown])
 
+
+  const submitInvalid: SubmitErrorHandler<FieldValues> = useCallback((invalid) => {
+    console.log(invalid);
+
+    setTimeout(() => {
+      form.clearErrors();
+    }, 2000)
+  }, [form])
   console.log('setGpuResult', gpuResult)
   return (
     <div className=" flex flex-col gap-6">
@@ -452,7 +460,10 @@ export default function StepForm() {
                     )}
                   />
                   <Button disabled={loading || !values?.promote} className='bg-linear-main  text-white disabled:opacity-50'
-                    onClick={form.handleSubmit(submit)}
+                    onClick={() => {
+                      form.handleSubmit(submit, submitInvalid)
+
+                    }}
                   >
                     Inference
                   </Button>
