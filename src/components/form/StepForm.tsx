@@ -464,7 +464,7 @@ export default function StepForm() {
                       </FormItem>
                     )}
                   />
-                  <Button disabled={loading || !values?.promote} className='bg-linear-main  text-white disabled:opacity-50'
+                  <Button disabled={loading} className='bg-linear-main  text-white disabled:opacity-50'
                     onClick={form.handleSubmit(submit, submitInvalid)}
                   >
                     Inference

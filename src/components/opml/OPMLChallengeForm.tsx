@@ -385,7 +385,7 @@ export default function StepForm({ promote, model }: StepFormProps) {
                 )}
               />
               <Button
-                disabled={loading || !values?.promote}
+                disabled={loading}
                 className="bg-linear-main  text-white disabled:opacity-50"
                 onClick={form.handleSubmit(submit)}
               >
