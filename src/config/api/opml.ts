@@ -35,7 +35,7 @@ export const fetchDispatcher = async (data?: any) => {
   }
   return await delayData({data: {
     result
-  }},10000)
+  }},5000)
 }
 
 export const fetchGpu = async (data?: any) => {
@@ -59,11 +59,11 @@ export const fetchGpu = async (data?: any) => {
       // })
   const result = {
     delay: '0x412411252189749812798198248918948914712489481',
-    text: `AI stands for "Artificial Intelligence." It is a broad field of computer science that aims to create intelligent machines that can think and learn like humans. AI can be achieved through a combination of techniques such as machine learning, natural language processing, computer vision, and robotics. The ultimate goal of AI research is to develop machines that can reason, learn, and adapt to new situations in a way that is similar to human intelligence.`,
+    text: `AI stands for "Artificial Intelligence." It refers to the development of computer systems that can perform tasks that normally require human intelligence, such as visual perception, speech recognition, decision-making, and language translation. AI can be achieved through a combination of techniques such as machine learning, natural language processing, computer vision, and robotics. The ultimate goal of AI research is to create machines that can think and learn like humans, and can even exceed human capabilities in certain areas.`,
   }
   return await delayData({data: {
     result
-  }},10000)
+  }},5000)
 }
 
 export const fetchScore = async () => {
@@ -109,7 +109,7 @@ export const fetchSbertScore = async (params: any[]) => {
     },
     {
         "prompt": "What is ai?",
-        "result": "AI stands for \"Artificial Intelligence.\" It is a broad field of computer science that aims to create intelligent machines that can think and learn like humans. AI can be achieved through a combination of techniques such as machine learning, natural language processing, computer vision, and robotics. The ultimate goal of AI research is to develop machines that can reason, learn, and adapt to new situations in a way that is similar to human intelligence.",
+        "result": "AI stands for \"Artificial Intelligence.\" It refers to the development of computer systems that can perform tasks that normally require human intelligence, such as visual perception, speech recognition, decision-making, and language translation. AI can be achieved through a combination of techniques such as machine learning, natural language processing, computer vision, and robotics. The ultimate goal of AI research is to create machines that can think and learn like humans, and can even exceed human capabilities in certain areas.",
         "score": 9.703027725219727
     }
 ];

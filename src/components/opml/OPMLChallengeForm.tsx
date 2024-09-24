@@ -343,6 +343,8 @@ export default function StepForm({ promote, model }: StepFormProps) {
       setStepStatus((s) => {
         return s+1
       })
+    } else {
+      setStepStatus(0)
     }
 
   }, [stepStatus]);
@@ -551,13 +553,13 @@ export default function StepForm({ promote, model }: StepFormProps) {
       </div>
       <div className=" flex w-full items-center justify-center">
           <Button
-            disabled={stepStatus > 4}
+            // disabled={stepStatus > 4}
             className="bg-linear-main  text-white disabled:opacity-50 w-40 text-center"
             onClick={() => {
               handleNextStep();
             }}
           >
-              {stepStatus > 0 ? 'Next' : 'Challenge'}
+              {stepStatus > 0 ? (stepStatus > 4 ? "Try again": "Next" ) : 'Challenge'}
               </Button>
       </div>
     </div>
